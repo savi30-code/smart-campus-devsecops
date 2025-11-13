@@ -11,11 +11,14 @@ pipeline {
             }
         }
 
-        stage('Code Scan - SonarQube') {
-            steps {
-                echo 'Performing static code analysis with SonarQube...'
-            }
+         stage('Code Scan - SonarQube') {
+     steps {
+        withSonarQubeEnv('SonarQubeServer') {
+            bat 'mvn clean verify sonar:sonar -Dsonar.projectKey=smart-campus-devsecops -Dsonar.projectName="Smart Campus DevSecOps"'
         }
+    }
+}
+
 
         stage('Dependency Scan - OWASP') {
             steps {
