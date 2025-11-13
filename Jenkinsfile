@@ -12,13 +12,15 @@ pipeline {
         }
 
         stage('Code Scan - SonarQube') {
-            steps {
-                withSonarQubeEnv('SonarQubeServer') {
-                    echo 'Running SonarScanner...'
-                    bat 'sonar-scanner'
-                }
+    steps {
+        withSonarQubeEnv('SonarQubeServer') {
+            script {
+                def scannerHome = tool 'SonarScanner'
+                bat "${scannerHome}\\bin\\sonar-scanner -Dsonar.projectKey=smart-campus -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqa_8dfa6fceb89b7da3d44a167dfc0ecf4fe7e810ac"
             }
         }
+    }
+}
 
         stage('Dependency Scan - OWASP') {
             steps {
