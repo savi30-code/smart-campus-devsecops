@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Clone Repository') {
             steps {
                 echo 'Cloning repository...'
@@ -12,19 +13,22 @@ pipeline {
         }
 
         stage('Code Scan - SonarQube') {
-    steps {
-        withSonarQubeEnv('SonarQubeServer') {
-            script {
-                def scannerHome = tool 'SonarScanner'
-                bat "${scannerHome}\\bin\\sonar-scanner -Dsonar.projectKey=smart-campus -Dsonar.sources=. -Dsonar.host.url=http://localhost:9000 -Dsonar.login=sqa_8dfa6fceb89b7da3d44a167dfc0ecf4fe7e810ac"
+            steps {
+                withSonarQubeEnv('SonarQubeServer') {
+                    script {
+                        // Using SonarScanner instead of Maven
+                        def scannerHome = tool 'SonarScanner'
+                        bat "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=smart-campus-devsecops -Dsonar.projectName='Smart Campus DevSecOps' -Dsonar.sources=."
+                    }
+                }
             }
         }
-    }
-}
 
-        stage('Dependency Scan - OWASP') {
+        stage('Dependency Check - OWASP') {
             steps {
                 echo 'Running OWASP Dependency Check...'
+                dependencyCheck additionalArguments: '--format HTML --out reports', odcInstallation: 'Default'
+                dependencyCheckPublisher pattern: 'reports/dependency-check-report.html'
             }
         }
 
@@ -36,7 +40,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                echo 'Deploying to cloud (AWS EC2/DigitalOcean)...'
+                echo 'Deploying to cloud (AWS EC2 / DigitalOcean)...'
             }
         }
     }
